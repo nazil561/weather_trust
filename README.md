@@ -1,56 +1,43 @@
-# SKY SENTRY — Orbital Debris Defense Grid
+# 🌍 WeatherTrust: The Verifiable Trust Layer for Climate Data
 
-Real-time monitoring dashboard for the SKY SENTRY hackathon demo. Plain HTML5, CSS3, and vanilla ES6+ JavaScript — no frameworks, no build step.
+**IEEE ClimateChain Global Hackathon 2026 Submission**
+**Track:** Climate Data & Environmental Monitoring
 
-## Requirements
+> *"Don't just share climate data. Prove how far to trust it."*
 
-- A FastAPI backend running on `http://localhost:8000`
-- A modern browser (Chrome, Firefox, Edge, Safari)
+## 📌 The Problem
+Climate decisions—from carbon markets to early warning systems—depend on satellite data. However, these readings can be corrupted by sensor drift, cloud contamination, and cyberattacks. Currently, users have no way to verify if the data they are using is authentic. If a malicious actor alters a temperature reading by even 1 degree, it can silently corrupt a multi-million dollar carbon credit or a climate model. 
 
-## Run
+## 🚀 The Solution
+**WeatherTrust** is a 3D, cinematic intelligence platform that acts as a verifiable trust layer. We don't just display data; we mathematically and cryptographically prove it is real.
 
-Serve the `frontend/` folder with any static server, or just open `index.html` directly:
+1. **AI Cross-Verification:** We fetch live ground truth from the Open-Meteo API and compare it against simulated satellite readings. If the delta (error) is too large due to a cloud edge or sensor drift, the AI calculates a low Trust Score (0-1) and flags the data.
+2. **Trust Gate Filtering:** Users can instantly filter out low-trust anomalies using a real-time slider on our 12K WebGL Earth.
+3. **Cryptographic Anchoring:** Every observation batch is hashed into a Merkle Tree. Users can simulate a cyberattack to watch the Merkle proof instantly break, proving data integrity on-chain.
+4. **Zero-Knowledge Privacy:** We use Circom ZK-SNARKs to prove data compliance without revealing proprietary satellite coordinates.
+
+## ✨ Key Features (Try these in the Live Demo!)
+*   **12K Cinematic Earth:** Built with Three.js (PBR rendering, real SGP4 orbital mechanics, 1,500+ instanced debris objects).
+*   **Global Target Acquisition:** Type any of 40+ global locations (India, Tokyo, London, etc.) to instantly re-scatter the AI data points and fetch the real local weather.
+*   **Multi-Domain Verification:** Toggle between Land Surface Temp (LST), Sea Surface Temp (SST), and Atmospheric Ozone (O3).
+*   **AI Explainability:** Click any red anomaly dot to see the Ground Truth Delta, a Radar Chart of failure metrics, and the raw SHA-256 hash.
+*   **Thermal & God's Eye View:** Cinematic camera modes to visualize the data grid like a military HUD.
+*   **Tamper Demo:** Click the red "TAMPER" button to watch the Merkle hash mismatch in the terminal log.
+
+## 🛠️ Technology Stack
+*   **Frontend:** Vanilla JS, **Three.js** (WebGL), Chart.js, HTML5/CSS3.
+*   **Data APIs:** Open-Meteo (Live Ground Truth), KeepTrack API (Real satellite TLEs).
+*   **Backend (Repo Only):** **FastAPI** (Python), Scikit-Learn (Isolation Forest ML model).
+*   **Web3/Crypto (Repo Only):** **Circom** (Groth16 ZK-SNARKs), **Solidity**, OpenZeppelin MerkleProof.
+
+## 💻 How to Run Locally
+
+The live GitHub Pages demo is 100% self-contained in the `/docs` folder (using frontend math for 60fps performance). To run it locally:
 
 ```bash
-# option 1 — python
-cd frontend
+# 1. Clone the repo
+git clone https://github.com/nazil561/weather_trust.git
+cd weather_trust/docs
+
+# 2. Start a local server
 python3 -m http.server 5500
-# open http://localhost:5500
-
-# option 2 — open the file directly
-open frontend/index.html
-```
-
-The page polls the backend every 1000ms regardless of origin, so no CORS proxy is required as long as the FastAPI app allows the request.
-
-## Endpoints consumed
-
-| Method | Path          | When                         |
-| ------ | ------------- | ---------------------------- |
-| GET    | `/api/track`  | Every 1000ms                 |
-| GET    | `/api/evade`  | Only while `status === "breach"` |
-
-## UI
-
-- **Header** — title bar with a live UTC clock.
-- **Status panel** — animated radar sweep plus a color-coded badge:
-  - `SAFE` — green pulse
-  - `WARNING` — amber pulse
-  - `BREACH` — red flash at 2 Hz with a full alert banner and the signed evasion token (click the token to copy it)
-- **Telemetry panel** — debris count, closest debris id/distance/velocity, safety-box radius, and a proximity gauge.
-- **Event log** — rolling, timestamped log of status transitions, fetch errors, and evasion dispatches.
-
-## Error handling
-
-- Unreachable backend → striped `OFFLINE — RETRYING...` banner and a `LINK LOST` footer indicator; polling continues.
-- Every fetch and `res.json()` is wrapped in `try/catch`, so malformed payloads never crash the app.
-- Non-2xx responses and unknown status values are treated as errors / `safe` respectively.
-
-## Files
-
-```
-frontend/
-├── index.html   markup + panel structure
-├── styles.css   theme, animations, responsive layout
-└── app.js       polling, rendering, logging, error handling
-```
