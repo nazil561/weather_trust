@@ -23,7 +23,7 @@
 <body class="state-safe">
   
   <header class="header">
-    <div class="header-title">🛰️ WEATHER TRUST — CLIMATE INTELLIGENCE</div>
+    <div class="header-title">🛰️ WEATHER TRUST — GLOBAL INTELLIGENCE</div>
     <div class="header-right">
       <div class="trust-gate">
           <span class="trust-label">TRUST GATE</span>
@@ -43,23 +43,50 @@
 
   <main class="dashboard">
     <section class="panel panel-metrics">
-      <h2 class="panel-title">SYSTEM METRICS</h2>
-      <div class="sector-stats">
+      <h2 class="panel-title">TARGET ACQUISITION</h2>
+      
+      <!-- GLOBAL SECTOR GRID -->
+      <div class="sector-grid" id="sector-grid">
+          <button class="sector-btn active" data-region="texas">US-TX</button>
+          <button class="sector-btn" data-region="california">US-CA</button>
+          <button class="sector-btn" data-region="india">IN-DL</button>
+          <button class="sector-btn" data-region="mumbai">IN-MU</button>
+          <button class="sector-btn" data-region="europe">EU-BE</button>
+          <button class="sector-btn" data-region="australia">AU-SY</button>
+          <button class="sector-btn" data-region="brazil">BR-SP</button>
+          <button class="sector-btn" data-region="japan">JP-TK</button>
+      </div>
+
+      <div class="data-selector mt-10">
+          <label for="domain-select">Data Domain:</label>
+          <select id="domain-select">
+              <option value="land">Land Surface Temp (LST)</option>
+              <option value="ocean">Sea Surface Temp (SST)</option>
+              <option value="atmos">Atmospheric Ozone (O3)</option>
+          </select>
+      </div>
+
+      <div class="sector-stats mt-20">
         <div class="stat"><span id="stat-sats">0</span><br>TILES</div>
         <div class="stat text-red"><span id="stat-objs">0</span><br>FLAGGED</div>
         <div class="stat text-cyan"><span id="stat-breach">0.0</span><br>MEAN TRUST</div>
       </div>
-      <div class="kv-table mt-20">
-        <div class="kv-row"><span class="kv-key">AI Model</span><span class="kv-val">v1.0.0 (Isolation Forest)</span></div>
-        <div class="kv-row"><span class="kv-key">Data Source</span><span class="kv-val">GOES-16 ABI</span></div>
-        <div class="kv-row"><span class="kv-key">Reference</span><span class="kv-val">ERA5-Land</span></div>
-        <div class="kv-row"><span class="kv-key">Blockchain</span><span class="kv-val">Sepolia Testnet</span></div>
+      
+      <div class="kv-row mt-20" style="border: 1px solid rgba(239, 68, 68, 0.4); padding: 10px; border-radius: 6px; background: rgba(239, 68, 68, 0.05);">
+          <span class="kv-key" style="color: #ef4444;">Carbon Value at Risk</span>
+          <span class="kv-val" id="carbon-value" style="color: #ef4444; font-weight: bold;">$0</span>
       </div>
+
       <div class="obj-hint mt-20">DRAG TO ROTATE. SCROLL TO ZOOM. CLICK A DOT TO INSPECT.</div>
     </section>
 
     <section class="panel panel-canvas">
       <div id="earth-canvas-container"></div>
+      <!-- SCANNING OVERLAY -->
+      <div id="scan-overlay" class="scan-overlay hidden">
+          <div class="scan-line"></div>
+          <div class="scan-text">ESTABLISHING UPLINK...</div>
+      </div>
     </section>
 
     <div class="right-col">
@@ -73,10 +100,13 @@
             <div class="kv-row"><span class="kv-key">Observation ID</span><span class="kv-val" id="l-id">—</span></div>
             <div class="kv-row"><span class="kv-key">Trust Score</span><span class="kv-val" id="l-trust">—</span></div>
             <div class="kv-row"><span class="kv-key">Primary Reason</span><span class="kv-val" id="l-reason">—</span></div>
-            <div class="kv-row"><span class="kv-key">Uncertainty</span><span class="kv-val" id="l-unc">—</span></div>
-            <div class="kv-row"><span class="kv-key">Satellite Reading</span><span class="kv-val" id="l-sat">—</span></div>
-            <div class="kv-row"><span class="kv-key">Ground Truth</span><span class="kv-val" id="l-ref">—</span></div>
+            <div class="kv-row"><span class="kv-key" id="l-sat-label">Satellite Reading</span><span class="kv-val" id="l-sat">—</span></div>
+            <div class="kv-row"><span class="kv-key" id="l-ref-label">Ground Truth</span><span class="kv-val" id="l-ref">—</span></div>
             <div class="kv-row"><span class="kv-key">Delta (Error)</span><span class="kv-val" id="l-delta">—</span></div>
+            <div class="kv-row" style="margin-top: 5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 5px;">
+                <span class="kv-key" style="font-size: 9px;">SHA-256 Hash</span>
+                <span class="kv-val" id="l-hash" style="font-size: 9px; color: #22d3ee; word-break: break-all; max-width: 150px; text-align: right;">—</span>
+            </div>
           </div>
           <div class="radar-container">
             <canvas id="radarChart"></canvas>
@@ -86,13 +116,16 @@
 
       <section class="panel panel-log">
         <h2 class="panel-title">ON-CHAIN AUDIT TRAIL</h2>
+        <div class="kv-table mb-10" style="border: 1px solid rgba(34, 211, 238, 0.3); padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.3);">
+            <div class="kv-row"><span class="kv-key" style="color: #22d3ee;">Live API (<span id="current-region-name">Austin, TX</span>)</span><span class="kv-val" id="live-api-temp" style="color: #f59e0b; font-weight: bold;">CONNECTING...</span></div>
+            <div class="kv-row"><span class="kv-key" style="color: #22d3ee;">Verification Status</span><span class="kv-val" id="live-api-status" style="color: #f59e0b;">PENDING</span></div>
+        </div>
         <div id="audit-chip" class="audit-chip">TAMPER-PROOF LEDGER: VERIFYING…</div>
         <ul id="event-log" class="event-log"></ul>
       </section>
     </div>
   </main>
 
-  <!-- GOD'S EYE VIEW OVERLAY -->
   <div id="gev-overlay" class="gev-overlay hidden">
     <div class="gev-top-bar">
       <span class="gev-rec"><span class="rec-dot"></span> REC</span>
